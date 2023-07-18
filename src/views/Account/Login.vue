@@ -23,19 +23,24 @@
     </div>
 </template>
 <script>
+import axios from 'axios';
+import { ref } from 'vue';
+
 export default {
+
     name: 'Login',
     data() {
         return {
+            basePath: import.meta.env.VITE_BACKEND_BASE_PATH,
             recaptchaSiteKey: import.meta.env.VITE_RECAPTCHA_SITE_KEY,
             username: '',
             password: '',
-            errors: [],
+            errors: ref([]),
         };
     },
     mounted() {
         this.loadRecaptchaScript();
-        this.initializeRecaptcha();
+        // this.initializeRecaptcha();
     },
     methods: {
         async loadRecaptchaScript() {
@@ -53,37 +58,36 @@ export default {
                 callback: this.recaptchaCallback,
             });
         },
-        async recaptchaCallback(response) {
+        recaptchaCallback(response) {
             console.log('reCAPTCHA response:', response);
         },
-        async login(e) {
+        async clearFormData() {
+            this.username = '';
+            this.password = '';
+            this.errors = [];
+            grecaptcha.reset();
+        },
+        async submitFormData(e) {
             e.preventDefault();
-
             const recaptchaResponse = grecaptcha.getResponse();
             if (!recaptchaResponse) {
-                console.log('reCAPTCHA verification failed');
+                this.errors.push('reCAPTCHA verification failed');
                 return;
             }
-
-            console.log('reCAPTCHA response:', recaptchaResponse);
-            document.getElementById('login-form').submit();
-
-
-            // Add your logic here to handle the reCAPTCHA response
-            // You can send the response to the server for verification or perform any other actions as needed
-
-            // Submit the login form programmatically
-
-            // grecaptcha.ready(function () {
-            //     const recaptchaSiteKey = this.recaptchaSiteKey; // Replace with your reCAPTCHA site key
-
-            //     grecaptcha.execute(recaptchaSiteKey, { action: 'submit' }).then(function (token) {
-            //         console.log(token);
-
-            //         // document.getElementById('login-form').submit(); // Replace 'login-form' with the actual ID of your login form
-            //     });
-            // });
-
+            try {
+                const response = await axios.post('http://localhost:8000/login/', {
+                    username: this.username,
+                    password: this.password,
+                    'g-recaptcha-response': recaptchaResponse, // Make sure to include the reCAPTCHA response
+                });
+                console.log('Login successful:', response.data);
+            } catch (error) {
+                console.error('An error occurred during login:', error);
+            }
+        },
+        async login(e) {
+            this.submitFormData(e);
+            this.clearFormData();
         },
     },
 };
