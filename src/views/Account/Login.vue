@@ -12,9 +12,9 @@
                         <label class="small" for="password">Password</label>
                         <input class="form-control" v-model="password" type="password" id="password" />
                     </div>
-                    <center>
+                    <div class="d-flex justify-content-center align-items-center">
                         <div class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
-                    </center>
+                    </div>
                     <p v-for="error in errors" class="small text-center text-warning">{{ error }}</p>
                     <input type="submit" class="btn btn-primary d-block" name="submit" value="Login" />
                 </form>
@@ -75,12 +75,16 @@ export default {
                 return;
             }
             try {
-                const response = await axios.post('http://localhost:8000/login/', {
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_PATH}/login/`, {
                     username: this.username,
                     password: this.password,
                     'g-recaptcha-response': recaptchaResponse, // Make sure to include the reCAPTCHA response
                 });
-                console.log('Login successful:', response.data);
+
+                const { token } = response.data;
+                this.$store.commit('setToken', token);
+                this.$store.commit('setLoggedIn', true);
+
             } catch (error) {
                 console.error('An error occurred during login:', error);
             }
