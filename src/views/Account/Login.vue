@@ -23,8 +23,8 @@
     </div>
 </template>
 <script>
-import axios from 'axios';
 import { ref } from 'vue';
+import { login } from '../../services/api.js';
 
 export default {
 
@@ -63,29 +63,26 @@ export default {
         async clearFormData() {
             this.username = '';
             this.password = '';
-            this.errors = [];
             grecaptcha.reset();
         },
         async submitFormData(e) {
             e.preventDefault();
             const recaptchaResponse = grecaptcha.getResponse();
             if (!recaptchaResponse) {
-                this.errors.push('reCAPTCHA verification failed');
+                errorMsg = 'reCAPTCHA verification failed';
                 return;
             }
             try {
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_PATH}/login/`, {
+                const response = await login({
                     username: this.username,
                     password: this.password,
-                    'g-recaptcha-response': recaptchaResponse, // Make sure to include the reCAPTCHA response
+                    'g-recaptcha-response': recaptchaResponse,
                 });
-
                 const { token } = response.data;
                 this.$store.commit('setToken', token);
                 this.$store.commit('setLoggedIn', true);
-
             } catch (error) {
-                console.error('An error occurred during login:', error);
+                errorMsg = 'An error occured during login';
             }
         },
         async login(e) {
