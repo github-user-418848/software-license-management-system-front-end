@@ -15,7 +15,7 @@
                     <div class="d-flex justify-content-center align-items-center">
                         <div class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
                     </div>
-                    <p v-for="error in errors" class="small text-center text-warning">{{ error }}</p>
+                    <p class="small text-center text-warning">{{ errorMsg }}</p>
                     <input type="submit" class="btn btn-primary d-block" name="submit" value="Login" />
                 </form>
             </div>
@@ -33,9 +33,9 @@ export default {
         return {
             basePath: import.meta.env.VITE_BACKEND_BASE_PATH,
             recaptchaSiteKey: import.meta.env.VITE_RECAPTCHA_SITE_KEY,
-            username: '',
-            password: '',
-            errors: ref([]),
+            username: ref(''),
+            password: ref(''),
+            errorMsg: ref(''),
         };
     },
     mounted() {
@@ -51,7 +51,6 @@ export default {
         async initializeRecaptcha() {
             const recaptchaSiteKey = this.recaptcha_site_key;
             const recaptchaContainer = document.querySelector('.g-recaptcha');
-
             grecaptcha.render(recaptchaContainer, {
                 sitekey: recaptchaSiteKey,
                 callback: this.recaptchaCallback,
