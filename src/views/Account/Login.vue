@@ -40,7 +40,6 @@ export default {
     },
     mounted() {
         this.loadRecaptchaScript();
-        // this.initializeRecaptcha();
     },
     methods: {
         async loadRecaptchaScript() {
